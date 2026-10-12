@@ -1,10 +1,14 @@
 # Musan — API access management
 
-Status: requirements draft v0.1, for discussion; not an approved implementation plan.
+Status: requirements draft v0.2, for discussion; not an approved implementation plan.
 
 Research date: 2026-10-12.
 
 Working name: Musan, taken from the repository name.
+
+Delivery phases, sequencing, milestones, and completion gates live in [ROADMAP.md](../ROADMAP.md). This PRD defines product behavior and acceptance criteria.
+
+Repository workflow and agent instructions live in [AGENTS.md](../AGENTS.md).
 
 ## 1. Product intent
 
@@ -48,11 +52,11 @@ Example: a customer integration may read orders through an API, subscribe to ord
 
 Musan administrators and external application consumers are separate trust boundaries. Existing host authentication may identify an administrator; it must not automatically grant that administrator access to every application's data.
 
-## 4. Phase 1 scope
+## 4. Product scope
 
-Priority **Must** means required for the proposed phase-1 release. **Should** means useful after the Must requirements work. These priorities are proposals, not evidence of a previously agreed backlog.
+Priority **Must** identifies required product behavior. **Should** identifies proposed enhancements. These priorities are proposals, not evidence of a previously agreed backlog. Release assignments and sequencing are defined in [the roadmap](../ROADMAP.md#phase-1--first-usable-release).
 
-| Capability | Proposed phase-1 boundary |
+| Capability | Product boundary |
 | --- | --- |
 | API access | API-key lifecycle, tenant/environment boundaries, named permissions, request admission limits, safe decision results. |
 | Webhooks | Outgoing event subscriptions, per-endpoint signing, durable acceptance, retries, inspection, controlled replay. |
@@ -61,7 +65,7 @@ Priority **Must** means required for the proposed phase-1 release. **Should** me
 | Management | Management operations usable by a host application; a standalone dashboard is optional. |
 | Operations | Access audit records, delivery diagnostics, documented failure and consistency behavior. |
 
-### Outside the proposed phase-1 boundary
+### Outside the current product scope
 
 - Replacing application login, SSO, or a complete identity provider.
 - Implementing an OAuth authorization server, consent product, or token exchange system from scratch.
@@ -73,7 +77,7 @@ Priority **Must** means required for the proposed phase-1 release. **Should** me
 - Native integrations for every language or framework at launch.
 - A globally distributed hosted platform, multi-region guarantees, or an enterprise policy engine.
 
-These boundaries can be changed during review. Broad integration reach is a long-term requirement; it is not a promise of universal phase-1 support.
+These boundaries can be changed during review. Broad integration reach is a long-term requirement; supported integrations and delivery milestones are specified in the roadmap.
 
 ## 5. Shared domain and access rules
 
@@ -110,7 +114,7 @@ Proposed rules:
 | INT-01 | Must | Provide framework-neutral contracts for management, credential verification, authorization, events, and error results. A host can integrate through documented contracts without importing a framework-specific adapter. The local-call versus remote-call form depends on the deployment decision. |
 | INT-02 | Must | Integrate with an existing identity and administrator authentication system. A sample adopter can manage credentials without migrating its users to Musan. |
 | INT-03 | Must | Keep framework bindings thin. Identical policy inputs produce equivalent decisions across supported integrations, including denial cases. |
-| INT-04 | Must | Document supported languages, runtime versions, transports, and limitations. Phase-1 release requires at least two selected language integrations to exercise the shared contract; the actual pair remains undecided. |
+| INT-04 | Must | Document supported languages, runtime versions, transports, and limitations. Supported integrations must pass shared contract conformance cases; the initial language selection and release coverage are defined in the roadmap. |
 | INT-05 | Must | Separate trusted management authority from consumer credentials. A normal consumer key cannot mint keys, change grants, or inspect another principal's deliveries. |
 | INT-06 | Should | Offer embeddable management UI components or a reference UI after management contracts stabilize. A full standalone dashboard is not a release dependency. |
 
@@ -207,26 +211,13 @@ Recommendation for review: keep contracts independent of frameworks and validate
 
 Turborepo is confirmed. Current official documentation supports mixed language workspaces, including experimental native Go, Python, and Rust support; languages without native support can use package-script wrappers. This is build orchestration, not automatic cross-language SDK generation or shared runtime semantics. [Turborepo multi-language guide](https://turborepo.dev/docs/guides/multi-language), [Turborepo 2.11 source documentation](https://github.com/vercel/turborepo/blob/main/apps/docs/content/blog/2-11.mdx).
 
-Proposed logical areas, with directories and package names deferred until design:
+Product acceptance requirements:
 
-- **Contracts:** versioned management/access definitions, event schemas, error taxonomy, and shared conformance cases.
-- **Runtime:** the selected implementation and its storage/decision/delivery integration boundaries.
-- **Language integrations:** independently distributable SDKs or bindings using native ecosystem packaging.
-- **Framework and MCP adapters:** thin integrations depending on contracts and supported runtime interfaces.
-- **Examples:** representative host applications used to demonstrate integration and compatibility.
-- **Documentation:** PRD, research, decisions, compatibility matrix, and operational guidance.
-- **Optional management application:** only if selected as a product deliverable.
+1. The monorepo supports development and validation of the selected language integrations under Turborepo orchestration.
+2. Published integrations use native ecosystem distribution with explicit version compatibility; consumers do not clone the monorepo to use the product.
+3. Framework-neutral integrations do not require a particular web framework, and supported integrations demonstrate equivalent contract behavior.
 
-Repository acceptance requirements:
-
-1. Turborepo orchestrates relevant build, validation, and documentation tasks while respecting cross-package dependencies.
-2. Native language toolchains and lockfiles remain authoritative for their packages. Experimental workspace discovery is evaluated before becoming a required build dependency.
-3. Contract changes trigger validation for affected integrations and examples.
-4. Cache inputs include contracts, toolchain/configuration versions, and relevant lockfiles; cache outputs exclude secrets and private runtime data.
-5. Integrations are released through their native registries with explicit version compatibility; consumers do not clone the monorepo to use the product.
-6. Framework-specific dependencies stay out of framework-neutral consumers. The chosen tooling must verify relevant boundaries or supplement them with language-native checks.
-
-No package manager, release tool, CI vendor, directory scaffold, or runtime package is created during this requirements stage.
+Operational rules for task orchestration, native toolchains, package boundaries, conformance validation, and caching are maintained in [AGENTS.md](../AGENTS.md#conventions-when-implementation-is-requested). Directory layout and technology selections remain design decisions.
 
 ## 10. Research implications and build/reuse choices
 
@@ -244,7 +235,7 @@ Decide capability by capability:
 
 Potential differentiation is the integration experience and consistent application capability model across API calls, event subscriptions, and MCP tools. This is a positioning hypothesis, not a verified absence of competing functionality.
 
-## 11. Release acceptance scenarios
+## 11. Product acceptance scenarios
 
 All scenarios are future acceptance requirements; no implementation or runtime tests have been executed.
 
@@ -286,4 +277,4 @@ Proposed product validation before a broad release:
 | Delivery/revocation targets | Proposals, numeric retry/retention budgets open | Needed to make operational guarantees testable. |
 | Distribution and license | Open | Library, self-hosted service, and managed offering carry different commitments. |
 
-Next stage: resolve the scope decisions, revise this PRD, then create an architecture/design document and a scoped implementation backlog. No architecture proposal in this draft authorizes implementation.
+These decisions feed the requirements and design phase in [the roadmap](../ROADMAP.md#phase-0--requirements-and-design). No architecture proposal in this draft authorizes implementation.
